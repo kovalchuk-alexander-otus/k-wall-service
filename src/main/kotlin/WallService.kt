@@ -1,12 +1,17 @@
-class WallService {
+object WallService {
     private var id: Int = 0
     private var posts: Array<Post> = emptyArray<Post>()
 
     /**
+     * Восемь бед - один reset (очистка собственных структур данных синглтона)
+     */
+    fun clear(){
+        id = 0;
+        posts = emptyArray();
+    }
+
+    /**
      * Создание записи
-     *
-     * добавлять запись в массив, но при этом назначать посту уникальный среди всех постов идентификатор;
-     * возвращать пост с уже выставленным идентификатором.
      */
     fun add(post: Post): Post {
         post.id = ++id;
