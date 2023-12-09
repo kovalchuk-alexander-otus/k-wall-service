@@ -1,3 +1,6 @@
+/**
+ * ..сие есть singleton - определяется словом object
+ */
 object WallService {
     private var id: Int = 0
     private var posts: Array<Post> = emptyArray<Post>()
