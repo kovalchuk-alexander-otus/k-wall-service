@@ -17,7 +17,8 @@ class WallServiceTest {
         val before = Post(
             Random.nextUInt(),
             Random.nextUInt(),
-            "Доброе утро, страна!"
+            "Доброе утро, страна!",
+            id = 1 // работаем с первым постом и поэтому id == 1
         )
 
         val after = WallService.add(
@@ -28,7 +29,7 @@ class WallServiceTest {
     }
 
     @Test
-    fun updateExisting() {
+    fun updateGood() {
 
         WallService.add(
             Post(
@@ -55,10 +56,22 @@ class WallServiceTest {
                 Random.nextUInt(),
                 "В-четвертых, полезный завтрак!",
                 arrayOf(Comment(3, false, false, false, true)),
-                id = 2
+                id = 4
             )
         )
 
         assertTrue(result)
+    }
+
+    @Test
+    fun ubdateNotGood(){
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "дыва"))
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "тыри"))
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "читыре"))
+
+        val result = WallService.update(Post(Random.nextUInt(), Random.nextUInt(), "пять",  id = 5))
+
+        assertFalse(result);
     }
 }

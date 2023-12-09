@@ -14,8 +14,7 @@ object WallService {
      * Создание записи
      */
     fun add(post: Post): Post {
-        post.id = ++id;
-        posts += post
+        posts += post.copy(id = ++id)
         return posts.last()
     }
 
@@ -25,17 +24,7 @@ object WallService {
     fun update(post: Post): Boolean {
         posts.forEachIndexed { i, p ->
             if (p.id == post.id) {
-                posts[i] = p.copy(
-                    toId = post.toId,
-                    fromId = post.fromId,
-                    text = post.text,
-                    comments = post.comments,
-                    likes = post.likes,
-                    views = post.views,
-                    canPin = post.canPin,
-                    canDelete = post.canDelete,
-                    canEdit = post.canEdit
-                )
+                posts[i] = post.copy()
                 return true
             }
         }
