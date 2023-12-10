@@ -1,14 +1,5 @@
 package attachments
 /**
- * Вид вложений - Подарок
- */
-class AttachmentGift(override val type: String, val gift: Gift) : Attachment {
-    override fun getAttachment(): Gift {
-        return gift
-    }
-}
-
-/**
  * Подарок
  */
 data class Gift(
@@ -16,5 +7,13 @@ data class Gift(
     val thumb_256: String, // URL изображения 256x256px.
     val thumb_96: String, // URL изображения 96x96px.
     val thumb_48: String // URL изображения 48x48px.
-) {
+)
+
+/**
+ * Вид вложений - Подарок
+ */
+class AttachmentGift(override val type: String, val gift: Gift) : Attachment {
+    override fun getAttachment(): Gift {
+        return gift
+    }
 }

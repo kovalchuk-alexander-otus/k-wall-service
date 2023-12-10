@@ -1,14 +1,11 @@
 package attachments
 
-class AttachmentFile(override val type: String = "file", val file: File) : Attachment {
-    override fun getAttachment(): File {
-        return file
-    }
-}
-
+/**
+ * Файл
+ */
 data class File(
     val id: Int, //
-    val owner_id: Int, // Идентификатор пользователя, загрузившего файл.
+    val ownerId: Int, // Идентификатор пользователя, загрузившего файл.
     val title: String, // Название файла.
     val size: Int, // Размер файла в байтах.
     val ext: String, // Расширение файла.
@@ -24,5 +21,10 @@ data class File(
 7 — электронные книги;
 8 — неизвестно.*/
     val preview: Preview // Информация для предварительного просмотра файла.
-) {
+)
+
+class AttachmentFile(override val type: String = "file", val file: File) : Attachment {
+    override fun getAttachment(): File {
+        return file
+    }
 }
