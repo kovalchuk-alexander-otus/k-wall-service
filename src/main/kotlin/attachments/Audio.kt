@@ -32,8 +32,4 @@ data class AudioMessage(
 /**
  * Вид вложений - Аудиозапись
  */
-class AttachmentAudio(override val type: String = "audio", val audio: Audio) : Attachment {
-    override fun getAttachment(): Any {
-        return audio
-    }
-}
+class AttachmentAudio(val audio: Audio) : Attachment("audio")

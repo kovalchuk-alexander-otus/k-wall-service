@@ -27,11 +27,7 @@ data class Photo(
 /**
  * Вид вложений - Фотография
  */
-class AttachmentPhoto(override val type: String, val photo: Photo) : Attachment {
-    override fun getAttachment(): Photo {
-        return photo
-    }
-}
+class AttachmentPhoto(val photo: Photo) : Attachment("photo")
 
 /**
  * Вид превью - Фотография
@@ -39,8 +35,7 @@ class AttachmentPhoto(override val type: String, val photo: Photo) : Attachment 
 data class PreviewPhoto(
     override val type: String = "photo",
     val sizes: Array<PhotoOptions> // массив копий изображения в разных размерах.
-) : Preview {
-}
+) : Preview
 
 /**
  * Вид превью - Граффити

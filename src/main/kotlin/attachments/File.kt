@@ -23,8 +23,4 @@ data class File(
     val preview: Preview // Информация для предварительного просмотра файла.
 )
 
-class AttachmentFile(override val type: String = "file", val file: File) : Attachment {
-    override fun getAttachment(): File {
-        return file
-    }
-}
+class AttachmentFile(val file: File) : Attachment("file")

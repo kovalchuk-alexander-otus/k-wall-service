@@ -12,8 +12,4 @@ data class Gift(
 /**
  * Вид вложений - Подарок
  */
-class AttachmentGift(override val type: String, val gift: Gift) : Attachment {
-    override fun getAttachment(): Gift {
-        return gift
-    }
-}
+class AttachmentGift(val gift: Gift) : Attachment("gift")

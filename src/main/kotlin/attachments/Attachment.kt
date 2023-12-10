@@ -3,8 +3,4 @@ package attachments
 /**
  * Вложения
  */
-interface Attachment {
-    val type: String
-
-    fun getAttachment(): Any
-}
+sealed class Attachment(val type: String)

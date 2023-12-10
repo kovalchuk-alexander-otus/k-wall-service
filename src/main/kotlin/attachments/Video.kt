@@ -66,8 +66,4 @@ data class Repost(
     val userReposted: Int // информация о том, сделал ли текущий пользователь репост этого видео.
 )
 
-class AttachmentVideo(override val type: String = "video", val video: Video) : Attachment {
-    override fun getAttachment(): Any {
-        return video
-    }
-}
+data class AttachmentVideo(val video: Video) : Attachment("video")
