@@ -1,7 +1,12 @@
+import exception.CommentNotFoundException
+import exception.PostNotFoundException
+import exception.WrongReasonException
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.assertThrows
+import java.lang.Exception
 import kotlin.random.Random
 import kotlin.random.nextUInt
 
@@ -36,7 +41,7 @@ class WallServiceTest {
                 Random.nextUInt(),
                 Random.nextUInt(),
                 "Во-первых, выпить чашку воды!",
-                arrayOf(Comment(1, true, true, true, true))
+                arrayOf(Comments(1, true, true, true, true))
             )
         )
         WallService.add(
@@ -44,7 +49,7 @@ class WallServiceTest {
                 Random.nextUInt(),
                 Random.nextUInt(),
                 "Во-вторых, утренняя гигиена!",
-                arrayOf(Comment())
+                arrayOf(Comments())
             )
         )
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "В-третьих, утренняя зарядка и душ!"))
@@ -55,7 +60,7 @@ class WallServiceTest {
                 Random.nextUInt(),
                 Random.nextUInt(),
                 "В-четвертых, полезный завтрак!",
-                arrayOf(Comment(3, false, false, false, true)),
+                arrayOf(Comments(3, false, false, false, true)),
                 id = 4
             )
         )
@@ -64,14 +69,79 @@ class WallServiceTest {
     }
 
     @Test
-    fun ubdateNotGood(){
+    fun ubdateNotGood() {
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "дыва"))
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "тыри"))
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "читыре"))
 
-        val result = WallService.update(Post(Random.nextUInt(), Random.nextUInt(), "пять",  id = 5))
+        val result = WallService.update(Post(Random.nextUInt(), Random.nextUInt(), "пять", id = 5))
 
         assertFalse(result);
+    }
+
+    // Функция отрабатывает правильно, если добавляется комментарий к правильному посту.
+    @Test
+    fun addCommentToExistingPost() {
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "дыва"))
+
+        val result = WallService.createComment(1, Comment(1u, 1, 1, "cool"))
+
+        assertEquals("cool", result.text)
+    }
+
+    // Функция выкидывает исключение, если была попытка добавить комментарий к несуществующему посту.
+    @Test
+    fun addCommentToNonExistingPost() {
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "дыва"))
+
+        assertThrows<PostNotFoundException> {
+            val result = WallService.createComment(9, Comment(1u, 1, 1, "cool"))
+        }
+    }
+
+    // Жалоба на комментарий
+    @Test
+    fun addReportToComment() {
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
+        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
+        val result = WallService.reportComment(11, 1u, 4u)
+
+        assertEquals(4u, result.reason)
+    }
+
+    // Ошибка при оставлении жалобы на комментарий с указанием неверной причины
+    @Test
+    fun addWrongReasonReportToComment() {
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
+        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
+
+        assertThrows<WrongReasonException> {
+            val result = WallService.reportComment(11, 1u, 9u)
+        }
+    }
+
+    // Ошибка при оставлении жалобы на несуществующий комментарий (id комментария)
+    @Test
+    fun addReportToNonExistingComment() {
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
+        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
+
+        assertThrows<CommentNotFoundException> {
+            val result = WallService.reportComment(11, 2u, 8u)
+        }
+    }
+
+    // Ошибка при оставлении жалобы на несуществующий комментарий (id автора)
+    @Test
+    fun addReportToOtherAuthorComment() {
+        WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
+        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
+
+        assertThrows<CommentNotFoundException> {
+            val result = WallService.reportComment(9, 1u, 8u)
+        }
     }
 }

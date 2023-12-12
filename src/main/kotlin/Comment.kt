@@ -1,10 +1,44 @@
+import attachments.Attachment
+
 /**
- * Информация о комментариях к записи
+ * Комментарий на стене
  */
 data class Comment(
-    var count: Int = 0, // количество комментариев
-    var canPost: Boolean = false, // информация о том, может ли текущий пользователь комментировать запись
-    var groupsCanPost: Boolean = false, // информация о том, могут ли сообщества комментировать запись
-    var canClose: Boolean = false, //может ли текущий пользователь закрыть комментарии к записи
-    var canOpen: Boolean = false // может ли текущий пользователь открыть комментарии к записи
+    val id: UInt, // Идентификатор комментария
+    val fromId: Int, // Идентификатор автора комментария
+    val date: Int, // Дата создания комментария в формате Unixtime
+    val text: String, // Текст комментария
+    val donut: Donut? = null, // Информация о VK Donut
+    val replyToUser: Int? = null, // Идентификатор пользователя или сообщества, в ответ которому оставлен текущий комментарий (если применимо)
+    val replyToComment: Int? = null, // Идентификатор комментария, в ответ на который оставлен текущий (если применимо)
+    val attachments: Array<Attachment>? = null, // Медиавложения комментария (фотографии, ссылки и т.п.)
+    val parentsStack: Array<Comment>? = null, // Массив идентификаторов родительских комментариев
+    val thread: Thread? = null // Информация о вложенной ветке комментариев
+)
+
+/**
+ * Признак донатера
+ */
+data class Donut(
+    val isDon: Boolean, // является ли комментатор подписчиком VK Donut.
+    val placeholder: String // заглушка для пользователей, которые не оформили подписку VK Donut.
+)
+
+/**
+ * Ветка комментариев
+ */
+data class Thread(
+    val count: Int, // количество комментариев в ветке
+    val items: Array<Comment>, // массив объектов комментариев к записи (только для метода wall.getComments)
+    val canPost: Boolean, // может ли текущий пользователь оставлять комментарии в этой ветке
+    val showReplyButton: Boolean, // нужно ли отображать кнопку «ответить» в ветке
+    val groupsCanPost: Boolean // могут ли сообщества оставлять комментарии в ветке
+)
+
+/**
+ * Жалобы на комментарии
+ */
+data class Report(
+    val comment: Comment,
+    val reason: UInt
 )
