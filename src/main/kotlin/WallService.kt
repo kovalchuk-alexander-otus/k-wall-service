@@ -76,8 +76,8 @@ object WallService {
         ownerId: Int, // Идентификатор пользователя или сообщества, которому принадлежит комментарий.
         commentId: UInt, // Идентификатор комментария.
         reason: UInt // Причина жалобы:
-    ) : Report {
-        if (reason < 0u || reason > 8u) throw WrongReasonException("Некорректное значение причины жалобы $reason.")
+    ): Report {
+        if (reason !in 0u..6u && reason != 8u) throw WrongReasonException("Некорректное значение причины жалобы $reason.")
 
         for (comment in comments) {
             if (comment.id == commentId && comment.fromId == ownerId) {
