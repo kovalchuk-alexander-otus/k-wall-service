@@ -1,3 +1,5 @@
+package service
+
 import exception.CommentNotFoundException
 import exception.PostNotFoundException
 import exception.WrongReasonException
@@ -6,7 +8,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
-import java.lang.Exception
+import objects.Comment
+import objects.Comments
+import objects.Post
+import service.WallService
 import kotlin.random.Random
 import kotlin.random.nextUInt
 

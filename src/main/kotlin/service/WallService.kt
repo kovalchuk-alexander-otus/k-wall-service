@@ -1,3 +1,8 @@
+package service
+
+import objects.Comment
+import objects.Post
+import objects.Report
 import exception.CommentNotFoundException
 import exception.PostNotFoundException
 import exception.WrongReasonException
@@ -15,8 +20,10 @@ object WallService {
      * Восемь бед - один reset (очистка собственных структур данных синглтона)
      */
     fun clear() {
-        id = 0;
-        posts = emptyArray();
+        id = 0
+        posts = emptyArray()
+        comments = emptyArray()
+        reports = emptyArray()
     }
 
     /**
