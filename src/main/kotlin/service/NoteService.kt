@@ -1,13 +1,19 @@
 package service
 
+import exception.CantCommentNoteException
 import exception.NoteAccessDeniedException
 import exception.NoteNotFoundException
+import objects.Comment
 import objects.Note
+import objects.Thread
+import java.util.UUID
 
 object NoteService {
 
-    private var id: UInt = 0u;
-    private var notes: List<Note> = ArrayList();
+    private var noteId: UInt = 0u
+    private var commentId: UInt = 0u
+    private var notes: List<Note> = ArrayList()
+    private var comments: MutableMap<String, Comment> = HashMap()
 
     /**
      * Создает новую заметку у текущего пользователя.
@@ -52,22 +58,54 @@ object NoteService {
     ): UInt {
         val unixTime = System.currentTimeMillis()
         notes += Note(
-            ++id,
+            ++noteId,
             title,
             text,
-            System.currentTimeMillis() / 1000,
+            System.currentTimeMillis(),
             privacyView,
             commentPrivacy,
             ownerId = ownerId
         )
-        return id
+        return noteId
     }
 
     /**
      * Добавляет новый комментарий к заметке.
      */
-    fun createComment() {
+    fun createComment(
+        noteId: String, // *Идентификатор заметки.
+        message: String, // *Текст комментария.
+        ownerId: UInt? = null, // Идентификатор владельца заметки.
+        replyTo: UInt? = null, // Идентификатор пользователя, ответом на комментарий которого является добавляемый комментарий (не передаётся, если комментарий не является ответом).
+        guid: String? = UUID.randomUUID()
+            .toString() // Уникальный идентификатор, предназначенный для предотвращения повторной отправки одинакового комментария.
+    ): UInt {
+        if (comments.containsKey(guid))
+            throw CantCommentNoteException("You can't comment this note $noteId.")
+        java.lang.Thread.sleep(1) // чтобы сортировка по времени была очевидна - сделаем тут задержку в 1 сек
+        for (note in notes) {
+            if (note.id == noteId.toUInt()) {
+                if (note.ownerId == ownerId
+                    || note.privacyView == "all"
+                ) {
+                    comments.put(
+                        guid ?: UUID.randomUUID().toString(),
+                        Comment(
+                            ++commentId,
+                            ownerId,
+                            System.currentTimeMillis(),
+                            message,
+                            replyToUser = replyTo,
+                            replyToComment = noteId.toUInt()
+                        )
+                    )
+                    return commentId
+                }
 
+                throw NoteAccessDeniedException("Access to note $noteId denied $ownerId.")
+            }
+        }
+        throw NoteNotFoundException("Note not found $noteId.")
     }
 
     /**
@@ -130,16 +168,25 @@ object NoteService {
     /**
      * Возвращает список комментариев к заметке.
      */
-    fun getComments() {
-
+    fun getComments(
+        noteId: UInt, // *Идентификатор заметки.
+        ownerId: UInt? = null, // Идентификатор владельца заметки.
+        sort: UInt = 0u, // Сортировка результатов (0 — по дате добавления в порядке возрастания, 1 — по дате добавления в порядке убывания).
+        offset: UInt = 0u, // Смещение, необходимое для выборки определенного подмножества комментариев.
+        count: UInt = 10u // Количество комментариев, которое необходимо получить.
+    ): List<Comment> {
+        var result =
+            comments.filter { c -> c.value.replyToComment == noteId && c.value.fromId == ownerId ?: c.value.fromId }.values.toList()
+        result = if (sort == 0u) result.sortedBy { s -> s.date } else result.sortedByDescending { s -> s.date }
+        return result.subList(offset.toInt(), (offset + count).toInt())
     }
 
     /**
      * Возвращает список заметок друзей пользователя.
+     *
+     * Данный метод устарел и ~может быть~ отключён ~через некоторое время~, пожалуйста, избегайте его использования.
      */
-    fun getFriendsNotes() {
-
-    }
+    fun getFriendsNotes() {}
 
     /**
      * Восстанавливает удалённый комментарий.
@@ -149,7 +196,8 @@ object NoteService {
     }
 
     fun clear() {
-        id = 0u
+        noteId = 0u
         notes = ArrayList()
     }
 }
+

@@ -11,7 +11,6 @@ import org.junit.jupiter.api.assertThrows
 import objects.Comment
 import objects.Comments
 import objects.Post
-import service.WallService
 import kotlin.random.Random
 import kotlin.random.nextUInt
 
@@ -91,7 +90,7 @@ class WallServiceTest {
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "дыва"))
 
-        val result = WallService.createComment(1, Comment(1u, 1, 1, "cool"))
+        val result = WallService.createComment(1, Comment(1u, 1u, 1, "cool"))
 
         assertEquals("cool", result.text)
     }
@@ -103,7 +102,7 @@ class WallServiceTest {
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "дыва"))
 
         assertThrows<PostNotFoundException> {
-            val result = WallService.createComment(9, Comment(1u, 1, 1, "cool"))
+            val result = WallService.createComment(9, Comment(1u, 1u, 1, "cool"))
         }
     }
 
@@ -111,8 +110,8 @@ class WallServiceTest {
     @Test
     fun addReportToComment() {
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
-        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
-        val result = WallService.reportComment(11, 1u, 4u)
+        val comment = WallService.createComment(1, Comment(1u, 11u, 1, "not bad"))
+        val result = WallService.reportComment(11u, 1u, 4u)
 
         assertEquals(4u, result.reason)
     }
@@ -121,10 +120,10 @@ class WallServiceTest {
     @Test
     fun addWrongReasonReportToComment() {
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
-        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
+        val comment = WallService.createComment(1, Comment(1u, 11u, 1, "not bad"))
 
         assertThrows<WrongReasonException> {
-            val result = WallService.reportComment(11, 1u, 9u)
+            val result = WallService.reportComment(11u, 1u, 9u)
         }
     }
 
@@ -132,10 +131,10 @@ class WallServiceTest {
     @Test
     fun addReportToNonExistingComment() {
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
-        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
+        val comment = WallService.createComment(1, Comment(1u, 11u, 1, "not bad"))
 
         assertThrows<CommentNotFoundException> {
-            val result = WallService.reportComment(11, 2u, 8u)
+            val result = WallService.reportComment(11u, 2u, 8u)
         }
     }
 
@@ -143,10 +142,10 @@ class WallServiceTest {
     @Test
     fun addReportToOtherAuthorComment() {
         WallService.add(Post(Random.nextUInt(), Random.nextUInt(), "ррраз"))
-        val comment = WallService.createComment(1, Comment(1u, 11, 1, "not bad"))
+        val comment = WallService.createComment(1, Comment(1u, 11u, 1, "not bad"))
 
         assertThrows<CommentNotFoundException> {
-            val result = WallService.reportComment(9, 1u, 8u)
+            val result = WallService.reportComment(9u, 1u, 8u)
         }
     }
 }

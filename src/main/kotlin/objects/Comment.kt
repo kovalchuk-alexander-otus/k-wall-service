@@ -7,12 +7,12 @@ import attachments.Attachment
  */
 data class Comment(
     val id: UInt, // Идентификатор комментария
-    val fromId: Int, // Идентификатор автора комментария
-    val date: Int, // Дата создания комментария в формате Unixtime
+    val fromId: UInt?, // Идентификатор автора комментария
+    val date: Long, // Дата создания комментария в формате Unixtime
     val text: String, // Текст комментария
     val donut: Donut? = null, // Информация о VK Donut
-    val replyToUser: Int? = null, // Идентификатор пользователя или сообщества, в ответ которому оставлен текущий комментарий (если применимо)
-    val replyToComment: Int? = null, // Идентификатор комментария, в ответ на который оставлен текущий (если применимо)
+    val replyToUser: UInt? = null, // Идентификатор пользователя или сообщества, в ответ которому оставлен текущий комментарий (если применимо)
+    val replyToComment: UInt? = null, // Идентификатор комментария, в ответ на который оставлен текущий (если применимо)
     val attachments: Array<Attachment>? = null, // Медиавложения комментария (фотографии, ссылки и т.п.)
     val parentsStack: Array<Comment>? = null, // Массив идентификаторов родительских комментариев
     val thread: Thread? = null // Информация о вложенной ветке комментариев
