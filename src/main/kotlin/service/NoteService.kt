@@ -5,7 +5,6 @@ import exception.NoteAccessDeniedException
 import exception.NoteNotFoundException
 import objects.Comment
 import objects.Note
-import objects.Thread
 import java.util.UUID
 
 object NoteService {
@@ -14,6 +13,9 @@ object NoteService {
     private var commentId: UInt = 0u
     private var notes: List<Note> = ArrayList()
     private var comments: MutableMap<String, Comment> = HashMap()
+    
+    val stateOpen : UInt = 1u
+    val stateDelete : UInt = 0u
 
     /**
      * Создает новую заметку у текущего пользователя.
@@ -63,7 +65,7 @@ object NoteService {
             text,
             System.currentTimeMillis(),
             privacyView,
-            commentPrivacy,
+            privacyComment,
             ownerId = ownerId
         )
         return noteId
@@ -111,33 +113,42 @@ object NoteService {
     /**
      * Удаляет заметку текущего пользователя.
      */
-    fun delete() {
+    fun delete(
+        noteId: String // *Идентификатор заметки.
+    ): UInt {
+        var result: UInt = 0u
+        notes.stream().filter { n -> n.id == noteId.toUInt() }.forEach { n ->
+            n.state = stateDelete
+            result = 1u
+        }
 
+        if (result == 1u) return result else throw NoteNotFoundException("Note not found $noteId.")
     }
 
     /**
      * Удаляет комментарий к заметке.
      */
-    fun deleteComment() {
-
-    }
+    fun deleteComment(
+        commentId: UInt, // *Идентификатор комментария.
+        ownerId: UInt // Идентификатор владельца заметки.
+    ) = changeStateComment(commentId, ownerId, stateDelete)
 
     /**
-     * Редактирует заметку текущего пользователя.
+     * TODO: Редактирует заметку текущего пользователя.
      */
     fun edit() {
 
     }
 
     /**
-     * Редактирует указанный комментарий у заметки.
+     * TODO: Редактирует указанный комментарий у заметки.
      */
     fun editComment() {
 
     }
 
     /**
-     * Возвращает список заметок, созданных пользователем.
+     * TODO: Возвращает список заметок, созданных пользователем.
      */
     fun get() {
 
@@ -191,13 +202,43 @@ object NoteService {
     /**
      * Восстанавливает удалённый комментарий.
      */
-    fun restoreComment() {
+    fun restoreComment(
+        commentId: UInt, // *Идентификатор удаленного комментария.
+        ownerId: UInt // Идентификатор владельца заметки.
+    ) = changeStateComment(commentId, ownerId, stateOpen)
 
+    fun changeStateComment(
+        commentId: UInt, // *Идентификатор удаленного комментария.
+        ownerId: UInt, // Идентификатор владельца заметки.
+        state: UInt // Статус
+    ): UInt {
+        var result: UInt = 0u
+        comments.filter { (key, com) -> com.id == commentId }.forEach { (key, com) ->
+            for (note in notes.stream().filter { note -> note.id == com.replyToComment }) {
+                result = 1u // признак, что нашли
+                if (note.ownerId != ownerId && note.privacyView != "all"
+                ) {
+                    throw NoteAccessDeniedException("Access to note $noteId denied $ownerId.")
+                }
+                if (note.ownerId != ownerId && note.privacyComment != "all"
+                ) {
+                    throw NoteAccessDeniedException("Access to comment $noteId denied $ownerId.")
+                }
+                com.state = state
+            }
+            if (result == 0u) throw NoteNotFoundException("Note not found $noteId.")
+        }
+        return result
     }
 
+    /**
+     * only-for-test
+     */
     fun clear() {
         noteId = 0u
+        commentId = 0u
         notes = ArrayList()
+        comments = HashMap()
     }
 }
 

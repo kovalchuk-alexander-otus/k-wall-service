@@ -28,4 +28,10 @@ fun main() {
     note.getComments(3u, 1u, 1u, 0u, 3u).forEach { c -> println(c) }
 
     note.getFriendsNotes()
+
+    println(note.delete("1"))
+    // println(note.delete("5"))
+
+    println(note.getById(1u))
+    println(note.getById(2u))
 }

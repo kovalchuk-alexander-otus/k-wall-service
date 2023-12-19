@@ -1,6 +1,7 @@
 package objects
 
 import attachments.Attachment
+import service.NoteService.stateOpen
 
 /**
  * Комментарий на стене
@@ -15,7 +16,8 @@ data class Comment(
     val replyToComment: UInt? = null, // Идентификатор комментария, в ответ на который оставлен текущий (если применимо)
     val attachments: Array<Attachment>? = null, // Медиавложения комментария (фотографии, ссылки и т.п.)
     val parentsStack: Array<Comment>? = null, // Массив идентификаторов родительских комментариев
-    val thread: Thread? = null // Информация о вложенной ветке комментариев
+    val thread: Thread? = null, // Информация о вложенной ветке комментариев
+    var state: UInt? = stateOpen // Статус заметки: 0 - удалена, 1 - создана
 )
 
 /**
