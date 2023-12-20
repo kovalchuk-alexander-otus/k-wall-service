@@ -10,7 +10,7 @@ data class Comment(
     val id: UInt, // Идентификатор комментария
     val fromId: UInt?, // Идентификатор автора комментария
     val date: Long, // Дата создания комментария в формате Unixtime
-    val text: String, // Текст комментария
+    var text: String, // Текст комментария
     val donut: Donut? = null, // Информация о VK Donut
     val replyToUser: UInt? = null, // Идентификатор пользователя или сообщества, в ответ которому оставлен текущий комментарий (если применимо)
     val replyToComment: UInt? = null, // Идентификатор комментария, в ответ на который оставлен текущий (если применимо)

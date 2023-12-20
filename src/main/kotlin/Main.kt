@@ -16,6 +16,9 @@ fun main() {
 
     println(note.getById(1u))
     println(note.getById(2u))
+    println(note.getById(3u))
+
+    println()
 
     note.createComment("1", "message")
     note.createComment("3", "message1", 1u)

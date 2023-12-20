@@ -4,10 +4,10 @@ import service.NoteService.stateOpen
 
 data class Note(
     val id: UInt, // Идентификатор заметки.
-    val title: String, // *Заголовок заметки.
-    val text: String, // *Текст заметки.
-    val date: Long, // Дата создания заметки в формате Unixtime.
-    val privacyView: String?, // Настройки приватности просмотра заметки.
+    var title: String, // *Заголовок заметки.
+    var text: String, // *Текст заметки.
+    var date: Long, // Дата создания заметки в формате Unixtime.
+    var privacyView: String?, // Настройки приватности просмотра заметки.
     /*
     Приватность возвращается в API в виде массива из следующих возможных значений:
         all – Доступно всем пользователям;
@@ -21,10 +21,11 @@ data class Note(
 
     Пример:
         Доступно всем пользователям, кроме друзей из списка №2 и кроме друга id1234:
-        privacy_view: ['all', '-list2', -1234]
+        privacyView: ['all', '-list2', -1234]
      */
-    val privacyComment: String?, // Настройки приватности комментирования заметки.
+    var privacyComment: String? = "all", // Настройки приватности комментирования заметки.
     /*
+    TODO: наблюдается какое-то дублирование по назначению атрибутов Заметки - privacy и commentPrivacy
     Возможные значения:
         0 — все пользователи,
         1 — только друзья,

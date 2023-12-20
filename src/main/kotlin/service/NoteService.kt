@@ -13,9 +13,9 @@ object NoteService {
     private var commentId: UInt = 0u
     private var notes: List<Note> = ArrayList()
     private var comments: MutableMap<String, Comment> = HashMap()
-    
-    val stateOpen : UInt = 1u
-    val stateDelete : UInt = 0u
+
+    val stateOpen: UInt = 1u
+    val stateDelete: UInt = 0u
 
     /**
      * Создает новую заметку у текущего пользователя.
@@ -53,7 +53,7 @@ object NoteService {
 
         Пример:
             Доступно всем пользователям, кроме друзей из списка №2 и кроме друга id1234:
-            privacy_view: ['all', '-list2', -1234]
+            privacyView: ['all', '-list2', -1234]
          */
         privacyComment: String? = "all", // Настройки приватности комментирования заметки в специальном формате.
         ownerId: UInt? = null // Аффтор жжёт
@@ -87,8 +87,8 @@ object NoteService {
         java.lang.Thread.sleep(1) // чтобы сортировка по времени была очевидна - сделаем тут задержку в 1 сек
         for (note in notes) {
             if (note.id == noteId.toUInt()) {
-                if (note.ownerId == ownerId
-                    || note.privacyView == "all"
+                if (ownerId != null && note.ownerId == ownerId
+                    || note.privacyComment == "all"
                 ) {
                     comments.put(
                         guid ?: UUID.randomUUID().toString(),
@@ -134,24 +134,89 @@ object NoteService {
     ) = changeStateComment(commentId, ownerId, stateDelete)
 
     /**
-     * TODO: Редактирует заметку текущего пользователя.
+     * Редактирует заметку текущего пользователя.
+     *
+     * TODO: требуется уточнение требований - в описании Заметок видится дублирование атрибутов
+     *  (не понятно как с ними работать privacy и commentPrivacy как будто дублируют privacyView и privacyComment)
      */
-    fun edit() {
-
+    fun edit(
+        noteId: String, // *Идентификатор заметки.
+        title: String, // *Заголовок заметки.
+        text: String, // *Текст заметки.
+        privacy: Int? = 0, // Уровень доступа к заметке. Возможные значения:
+        /*
+        0 — все пользователи,
+        1 — только друзья,
+        2 — друзья и друзья друзей,
+        3 — только пользователь.
+        */
+        commentPrivacy: Int? = 0, // Уровень доступа к комментированию заметки. Возможные значения:
+        /*
+        0 — все пользователи,
+        1 — только друзья,
+        2 — друзья и друзья друзей,
+        3 — только пользователь.
+        */
+        privacyView: String? = "all", // Настройки приватности просмотра заметки в специальном формате.
+        privacyComment: String? = "all" // Настройки приватности комментирования заметки в специальном формате.
+    ): UInt {
+        notes.forEach { note ->
+            if (note.id == noteId.toUInt() && note.state == stateOpen) {
+                note.title = title
+                note.text = text
+                note.date = System.currentTimeMillis()
+                note.privacyView = privacyView
+                note.privacyComment = privacyComment
+                return 1u
+            }
+        }
+        throw NoteNotFoundException("Note not found $noteId.")
     }
 
     /**
-     * TODO: Редактирует указанный комментарий у заметки.
+     * Редактирует указанный комментарий у заметки.
      */
-    fun editComment() {
-
+    fun editComment(
+        commentId: UInt, // *Идентификатор комментария.
+        ownerId: UInt? = 0u, // Идентификатор владельца заметки.
+        message: String? // Новый текст комментария.Мин.длина = 2
+    ): UInt {
+        var result: UInt = 0u
+        comments.filter { (key, com) -> com.id == commentId }.forEach { (key, com) ->
+            for (note in notes.stream().filter { note -> note.id == com.replyToComment }) {
+                result = 1u // признак, что нашли
+                if (note.ownerId != ownerId && note.privacyView != "all"
+                ) {
+                    throw NoteAccessDeniedException("Access to note $noteId denied $ownerId.")
+                }
+                if (note.ownerId != ownerId && note.privacyComment != "all"
+                ) {
+                    throw NoteAccessDeniedException("Access to comment $noteId denied $ownerId.")
+                }
+                if (message != null && message.length >= 2) {
+                    com.text = message
+                }
+            }
+            if (result == 0u) throw NoteNotFoundException("Note not found $noteId.")
+        }
+        return result
     }
 
     /**
-     * TODO: Возвращает список заметок, созданных пользователем.
+     * Возвращает список заметок, созданных пользователем.
      */
-    fun get() {
-
+    fun get(
+        noteIds: String, // Идентификаторы заметок, информацию о которых необходимо получить.
+        userId: UInt, // Идентификатор пользователя, информацию о заметках которого требуется получить.
+        offset: UInt = 0u, // Смещение, необходимое для выборки определенного подмножества заметок.
+        count: UInt = 10u, // Количество заметок, информацию о которых необходимо получить.
+        sort: UInt = 0u // Сортировка результатов (0 — по дате создания в порядке убывания, 1 - по дате создания в порядке возрастания).
+    ): List<Note> {
+        val noteIdsArray: List<String> = noteIds.split(",")
+        var result =
+            notes.filter { c -> noteIdsArray.contains(c.id.toString()) && c.ownerId == userId }.toList()
+        result = if (sort == 0u) result.sortedBy { s -> s.date } else result.sortedByDescending { s -> s.date }
+        return result.subList(offset.toInt(), (offset + count).toInt())
     }
 
     /**
@@ -189,7 +254,7 @@ object NoteService {
         var result =
             comments.filter { c -> c.value.replyToComment == noteId && c.value.fromId == ownerId ?: c.value.fromId }.values.toList()
         result = if (sort == 0u) result.sortedBy { s -> s.date } else result.sortedByDescending { s -> s.date }
-        return result.subList(offset.toInt(), (offset + count).toInt())
+        return result.subList(offset.toInt(), Math.min((offset + count).toInt(), result.size))
     }
 
     /**
@@ -214,7 +279,7 @@ object NoteService {
     ): UInt {
         var result: UInt = 0u
         comments.filter { (key, com) -> com.id == commentId }.forEach { (key, com) ->
-            for (note in notes.stream().filter { note -> note.id == com.replyToComment }) {
+            for (note in notes.stream().filter { note -> note.id == com.replyToComment && note.state == stateOpen }) {
                 result = 1u // признак, что нашли
                 if (note.ownerId != ownerId && note.privacyView != "all"
                 ) {
